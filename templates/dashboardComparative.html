@@ -1,0 +1,130 @@
+{% load static %}
+
+<script src="{% static 'lib/highcharts-8.1.2/Core/highcharts.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/exporting.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/export-data.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/accessibility.js' %}"></script>
+<!-- jQuery -->
+<script src="{% static 'lib/adminlte/plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'lib/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'lib/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'lib/adminlte/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'lib/adminlte/js/demo.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="form-group">
+                <label for="yearSelect">Select Year:</label>
+                <div id="yearSelectContainer">
+                    <label class="switch-container">
+                        <input type="radio" id="year2023" name="year" value="2023" onchange="changeYear()" checked>
+                        <div class="switch"></div>
+                        <span class="switch-label">2023</span>
+                    </label>
+                    
+                    <label class="switch-container">
+                        <input type="radio" id="year2014" name="year" value="2014" onchange="changeYear()">
+                        <div class="switch"></div>
+                        <span class="switch-label">2014</span>
+                    </label>
+                </div>
+            </div>
+            <div id="container"></div>
+        </div>
+    </div>
+    <br>
+</div>
+
+<script type="application/javascript">
+    var currentFolder = '2023';
+
+    // Función para cargar datos desde el JSON
+    function cargarDatos(folder, nombreArchivo, callback) {
+        $.getJSON("{% static 'jsons/' %}" + folder + "/" + nombreArchivo, function(data) {
+            callback(data);
+        });
+    }
+
+    // Función para inicializar el gráfico
+    function inicializarGrafico(response, year) {
+        var titleFromJSON = response.title;
+        var data = response.data;
+        var paises = data.map(function(entry) {
+            return entry.PAIS;
+        });
+
+        var categoriasFiltradas = Object.keys(data[0])
+            .filter(key => key !== "PAIS" && key !== "TOTAL" && key !== "Base: Total")
+            .filter(key => !["0", "Base: Total", "Base: Weighted Total", "Oui, un(e) m\u00e9decin g\u00e9n\u00e9raliste", "Oui, un(e) pharmacien(ne)", "Oui, un(e) psychiatre","Oui, un(e) psychologue", "Oui, un(e) psychanalyste", "Oui, un infirmier/ une infirmi\u00e8re", "Oui, un(e) assistant(e) social(e)", "Oui, un(e) psychoth\u00e9rapeute non mentionn\u00e9(e) pr\u00e9c\u00e9demment", "Oui, un(e) autre professionnel(le) de la sant\u00e9", "Oui, quelqu\u2019un d\u2019autre (SPONTANE)", "Oui, un(e) pharmacien(ne) ", "Oui, un(e) psychanalyste ", "Non ", "Non", "NSP", "Total 'oui'"].includes(key));
+
+        var seriesData = categoriasFiltradas.map(key => ({
+            name: key.replace(/_/g, ' '),
+            data: data.map(entry => {
+                if (year === '2023') {
+                    return Math.round((entry[key] / entry["Base: Total"]) * 100);
+                } else {
+                    return parseFloat(entry[key]) * 100;
+                }
+            })
+        }));
+
+        Highcharts.chart('container', {
+            chart: { type: 'column' },
+            title: { text: titleFromJSON },
+            xAxis: {
+                categories: paises,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                max: 100,
+                title: { text: 'Percentage' },
+                labels: { format: '{value}%' }
+            },
+            series: seriesData,
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.2f}%</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            }
+        });
+    }
+
+    // Función para cambiar entre carpetas 2014 y 2023 al seleccionar un año
+    function changeYear() {
+        var selectedYear = $('input[name="year"]:checked').val();
+        var archivoJson;
+        if (selectedYear === '2023') {
+            archivoJson = 'Q16.json';
+        } else if (selectedYear === '2014') {
+            archivoJson = 'QD4.json';
+        }
+        cargarDatos(selectedYear, archivoJson, function(data) {
+            inicializarGrafico(data, selectedYear);
+        });
+    }
+
+    // Cargar datos iniciales al cargar la página
+    $(document).ready(function() {
+        cargarDatos('2023', 'Q16.json', function(data) {
+            inicializarGrafico(data, '2023');
+        });
+    });
+</script>

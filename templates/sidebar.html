@@ -1,0 +1,120 @@
+  {% load static %}
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="{% url 'home' %}" class="brand-link">
+      <img src="{% static 'lib/adminlte/img/Flag_of_Europe.svg.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">EU Mentalhealth</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            <a class="nav-link">
+              <p>
+                Questionnaire
+              </p>
+            </a>
+              <li class="nav-item">
+                <a href="{% url 'questionnaire2014' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Questionnaire 2014</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'questionnaire2023' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Questionnaire 2023</p>
+                </a>
+              </li>
+          <li class="nav-item">
+            <a class="nav-link">
+              <p>
+                Comparative
+              </p>
+            </a>
+          </li>
+              <li class="nav-item">
+                <a href="{% url 'comparative2023vs2014' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>2023 vs 2014</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'comparativeMHvsOP' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Mental Health Patients vs Other Patients</p>
+                </a>
+              </li>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link">
+              <p>
+                Mental Health Stigma
+              </p>
+            </a>
+          </li>
+              <li class="nav-item">
+                <a href="{% url 'stigmaGeneral' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>General</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'stigmaSpecific' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Specific</p>
+                </a>
+              </li>
+          </li>
+              <li class="nav-item">
+                <a class="nav-link">
+                  <p>COVID-19</small></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'questionnaireCOVID' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>COVID-19 Diagrams</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'mapCovid' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Map Covid</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link">
+                  <p>War</small></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'mapWar' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Map War</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  <!-- jQuery -->
+  <script src="{% static 'lib/adminlte/plugins/jquery/jquery.min.js' %}"></script>
+  <!-- Bootstrap 4 -->
+  <script src="{% static 'lib/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <!-- overlayScrollbars -->
+  <script src="{% static 'lib/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+  <!-- AdminLTE App -->
+  <script src="{% static 'lib/adminlte/js/adminlte.min.js' %}"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="{% static 'lib/adminlte/js/demo.js' %}"></script>
+  </aside>

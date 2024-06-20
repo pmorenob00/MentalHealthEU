@@ -1,0 +1,117 @@
+{% load static %}
+
+<script src="{% static 'lib/highcharts-8.1.2/Core/highcharts.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/exporting.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/export-data.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/accessibility.js' %}"></script>
+<!-- jQuery -->
+<script src="{% static 'lib/adminlte/plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'lib/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'lib/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'lib/adminlte/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'lib/adminlte/js/demo.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'css/estilos.css' %}">  
+
+<div class="container-fluid">
+    <div class="flecha izquierda" onclick="cambiarJsonAnterior()">‹</div>
+    <div class="flecha derecha" onclick="cambiarJson()">›</div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="form-group"></div>
+            <div id="container"></div>
+        </div>
+    </div>
+    <br>
+</div>
+
+<script type="application/javascript">
+    // Function to load data from JSON
+    function cargarDatos(nombreArchivo, callback) {
+        $.getJSON("{% static 'jsons/2023/' %}" + nombreArchivo, function(data) {
+            callback(data);
+        });
+    }
+
+    // Function to initialize the chart
+    function inicializarGrafico(response) {
+        // Extract the title from the response object
+        var titleFromJSON = response.title;
+        // Extraction of data array from the response object
+        var data = response.data;
+
+        data.forEach(function(entry) {
+            delete entry["Base: Weighted Total"];
+            delete entry[0];
+        });
+
+        var paises = data.map(entry => entry.PAIS);
+        var categorias = Object.keys(data[0]).filter(key => key !== "PAIS" && key !== "Base: Total");
+
+        var seriesData = categorias.map(key => ({
+            name: key.replace(/_/g, ' '),
+            data: data.map(entry => Math.round((entry[key] / entry["Base: Total"]) * 100))
+        }));
+
+        Highcharts.chart('container', {
+            chart: { type: 'column' },
+            title: { text: titleFromJSON },
+            xAxis: {
+                categories: paises,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                max: 100,
+                title: { text: 'Percentage' }
+            },
+            series: seriesData,
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y}%</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+        });
+    }
+
+    var archivosJson = ["Q1.json", "Q2.json", "Q3.json", "Q4.json", "Q5.json", "Q6.json", "Q7.json", "Q9.json", "Q10.json", "Q11.json"];
+    var indiceJsonActual = 0;
+
+    function cambiarJson() {
+        indiceJsonActual++;
+        if (indiceJsonActual >= archivosJson.length) {
+            indiceJsonActual = 0;
+        }
+        cargarDatos(archivosJson[indiceJsonActual], function(data) {
+            inicializarGrafico(data);
+        });
+    }
+
+    function cambiarJsonAnterior() {
+        indiceJsonActual--;
+        if (indiceJsonActual < 0) {
+            indiceJsonActual = archivosJson.length - 1;
+        }
+        cargarDatos(archivosJson[indiceJsonActual], function(data) {
+            inicializarGrafico(data);
+        });
+    }
+
+    cargarDatos(archivosJson[indiceJsonActual], function(data) {
+        inicializarGrafico(data);
+    });
+</script>

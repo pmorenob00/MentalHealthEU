@@ -1,0 +1,134 @@
+{% load static %}
+
+<script src="{% static 'lib/highcharts-8.1.2/Core/highcharts.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/exporting.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/export-data.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/accessibility.js' %}"></script>
+<!-- jQuery -->
+<script src="{% static 'lib/adminlte/plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'lib/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'lib/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'lib/adminlte/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'lib/adminlte/js/demo.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'css/estilos.css' %}">  
+
+<div class="container-fluid">
+    <div class="flecha izquierda" onclick="cambiarJsonAnterior()">‹</div>
+    <div class="flecha derecha" onclick="cambiarJson()">›</div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="form-group"></div>
+            <div id="container"></div>
+        </div>
+    </div>
+    <br>
+</div>
+
+<script type="application/javascript">
+    // Función para cargar datos desde el JSON
+    function cargarDatos(nombreArchivo, callback) {
+
+        $.getJSON("{% static 'jsons/2014/' %}" + nombreArchivo, function(data) {
+            callback(data);
+        });
+    }
+
+    // Función para inicializar el gráfico
+    function inicializarGrafico(response) {
+        // Extract the title from the response object
+        var titleFromJSON = response.title;
+        // Extracting the array from the response object
+        var data = response.data;
+
+        // Define the 'paises' array before using it
+        var paises = data.map(function(entry) {
+        // Assuming 'PAIS' contains the full country name
+        return entry.PAIS;
+    });
+
+        // Filtrar las categorías en francés para no presentar el nuevo conjunto de datos
+        var categoriasFiltradas = Object.keys(data[0])
+            .filter(key => key !== "PAIS" && key !== "TOTAL")
+            .filter(key => !["Tout le temps", "La plupart du temps", "Quelques fois", "Rarement", "Jamais", "NSP"].includes(key));
+
+        var seriesData = categoriasFiltradas.map(key => ({
+            name: key.replace(/_/g, ' '), // Reemplazar guiones bajos con espacios
+            data: data.map(entry => parseFloat(entry[key]) * 100) // Convertir a porcentaje y ajustar formato   
+        }));
+
+        // Add title from JSON to the top of the diagram
+        var titleFromJSON = response.title;
+
+        var graphcolumn = Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: titleFromJSON
+            },
+            xAxis: {
+                categories: paises,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                max: 100, // Establecer el máximo en 100 para representar porcentajes
+                title: {
+                    text: 'Percentage'
+                },
+                labels: {
+                    format: '{value}%'
+                }
+            },
+            series: seriesData,
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.2f}%</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+        });
+    }
+
+    // Función para cambiar entre diferentes archivos JSON
+    var archivosJson = ["QD1.1.json", "QD1.2.json", "QD2.1.json", "QD2.2.json", "QD2.3.json", "QD2.4.json", "QD2.5.json", "QD2.6.json", "QD2.7.json", "QD2.8.json", "QD2.9.json"];
+    var indiceJsonActual = 0;
+
+    function cambiarJson() {
+        indiceJsonActual++;
+        if (indiceJsonActual >= archivosJson.length) {
+            indiceJsonActual = 0;
+        }
+        cargarDatos(archivosJson[indiceJsonActual], function(data) {
+            inicializarGrafico(data);
+        });
+    }
+
+    function cambiarJsonAnterior() {
+        indiceJsonActual--;
+        if (indiceJsonActual < 0) {
+            indiceJsonActual = archivosJson.length - 1;
+        }
+        cargarDatos(archivosJson[indiceJsonActual], function(data) {
+            inicializarGrafico(data);
+        });
+    }
+
+    cargarDatos(archivosJson[indiceJsonActual], function(data) {
+        inicializarGrafico(data);
+    });
+</script>

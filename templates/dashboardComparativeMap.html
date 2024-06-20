@@ -1,0 +1,131 @@
+{% load static %}
+
+<script src="{% static 'lib/highcharts-8.1.2/Core/highcharts.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/exporting.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/export-data.js' %}"></script>
+<script src="{% static 'lib/highcharts-8.1.2/Core/modules/accessibility.js' %}"></script>
+<!-- jQuery -->
+<script src="{% static 'lib/adminlte/plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'lib/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'lib/adminlte/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'lib/adminlte/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'lib/adminlte/js/demo.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'css/estilos.css' %}">  
+
+<div class="container-fluid">
+    <button class="btn" onclick="cambiarJson()">Learn More</button>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="form-group">
+            </div>
+            <div id="container"></div>
+        </div>
+    </div>
+    <br>
+</div>
+
+<script type="application/javascript">
+    // Function to load data from JSON
+    function cargarDatos(nombreArchivo, callback) {
+        $.getJSON("{% static 'jsons/2023/' %}" + nombreArchivo, function(data) {
+            callback(data);
+        });
+    }
+
+    // Function to initialize the chart
+    function inicializarGrafico(response) {
+        // Extract the title from the response object
+        var titleFromJSON = response.title;
+
+        // Extraction of data array from the response object
+        var data = response.data;
+
+        // Filter out unwanted keys from the data
+        data.forEach(function(entry) {
+            delete entry["Base: Weighted Total"];
+            delete entry[0];
+            delete entry["0 - Poor"];
+            delete entry["1"];
+            delete entry["2"];
+            delete entry["3"];
+            delete entry["4"];
+            delete entry["5"];
+            delete entry["6"];
+            delete entry["7"];
+            delete entry["8"];
+            delete entry["9"];
+            delete entry["10 - Excellent"];
+            delete entry["Not applicable"];
+        });
+
+        
+        // Extract paises and categorias
+        var paises = data.map(entry => entry.PAIS);
+        var categorias = Object.keys(data[0]).filter(key => key !== "PAIS" && key !== "Base: Total");
+
+        // Calculate percentages for each category
+        var seriesData = categorias.map(key => ({
+            name: key.replace(/_/g, ' '), // Replace underscores with spaces
+            data: data.map(entry => {
+                // Calculate percentage for each field based on "Base: Total"
+                return Math.round((entry[key] / entry["Base: Total"]) * 100);
+            })
+        }));
+
+        // Create the column chart
+        var graphcolumn = Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: titleFromJSON
+            },
+            xAxis: {
+                categories: paises,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                max: 100,
+                title: {
+                    text: 'Percentage'
+                }
+            },
+            series: seriesData,
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y}%</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+        });
+    }
+
+    // Function to switch between different JSON files
+    var archivosJson = ["Q8_1.json", "Q8_2.json", "Q8_3.json"];
+    var indiceJsonActual = -1;
+
+    function cambiarJson() {
+        indiceJsonActual++; 
+        if (indiceJsonActual >= archivosJson.length) {
+            indiceJsonActual = 0;
+        }
+        cargarDatos(archivosJson[indiceJsonActual], function(data) {
+            inicializarGrafico(data);
+        });
+    }
+</script>

@@ -1,0 +1,196 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Example</title>
+    <!-- Include Highcharts library -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/map.js"></script>
+    <script src="https://code.highcharts.com/mapdata/custom/europe.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Add your styles here */
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <label for="rangeSelect">Select Range:</label>
+                    <div id="rangeSelect">
+                        <label class="switch-container">
+                            <input type="radio" id="rangeGreat" name="range" value="To a great extent" onchange="changeRange()" checked>
+                            <div class="switch"></div>
+                            <span class="switch-label">To a great extent</span>
+                        </label>
+                        
+                        <label class="switch-container">
+                            <input type="radio" id="rangeSomewhat" name="range" value="Somewhat" onchange="changeRange()">
+                            <div class="switch"></div>
+                            <span class="switch-label">Somewhat</span>
+                        </label>
+                        
+                        <label class="switch-container">
+                            <input type="radio" id="rangeLittle" name="range" value="Very little" onchange="changeRange()">
+                            <div class="switch"></div>
+                            <span class="switch-label">Very little</span>
+                        </label>
+                        
+                        <label class="switch-container">
+                            <input type="radio" id="rangeNotAll" name="range" value="Not at all" onchange="changeRange()">
+                            <div class="switch"></div>
+                            <span class="switch-label">Not at all</span>
+                        </label>
+
+                        <label class="switch-container">
+                            <input type="radio" id="rangeDK" name="range" value="Don't know" onchange="changeRange()">
+                            <div class="switch"></div>
+                            <span class="switch-label">Don't know</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="container"></div>
+            </div>
+        </div>
+        <br>
+    </div>
+
+    <script>
+        async function loadData(jsonFile) {
+            const response = await fetch('{% static "jsons/2023/" %}' + jsonFile);
+            const json = await response.json();
+            return json;
+        }
+
+        async function renderMap(data) {
+            const countryMap = {
+                'EL': 'GR', // Change EL to GR
+                'CY': 'NC'  // Change CY to NC
+            };
+
+            // Update country codes in data
+            data.forEach(entry => {
+                const countryCode = entry.code;
+                if (countryMap.hasOwnProperty(countryCode)) {
+                    entry.code = countryMap[countryCode];
+                }
+            });
+            Highcharts.mapChart('container', {
+                chart: {
+                    map: 'custom/europe',
+                    spacingBottom: 20
+                },
+                title: {
+                    text: 'Europe Map'
+                },
+                colorAxis: {
+                    type: 'linear',
+                    min: 0,
+                    max: 50,
+                    stops: [
+                        [0, '#E6F7FF'],   // Very light blue
+                        [0.2, '#4DB8FF'], // Light blue
+                        [0.4, '#1A4EE6'], // Medium light blue
+                        [0.6, '#1528DA'], // Medium blue
+                        [0.8, '#170D8E'], // Medium dark blue
+                        [1, '#0C055D']    // Dark blue
+                    ]
+                },
+
+                series: [{
+                    name: 'Europe',
+                    mapData: Highcharts.maps['custom/europe'],
+                    borderColor: '#A0A0A0',
+                    nullColor: 'rgba(200, 200, 200, 0.3)',
+                    joinBy: ['iso-a2', 'code'],
+                    data: data,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.properties.iso-a2}'
+                    }
+                }]
+            });
+        }
+
+        async function changeRange() {
+            const radioButtons = document.querySelectorAll('input[type="radio"][name="range"]');
+            let selectedRange;
+
+            // Obtener el valor del botón de radio seleccionado
+            radioButtons.forEach(radioButton => {
+                if (radioButton.checked) {
+                    selectedRange = radioButton.value;
+                }
+            });
+
+            // Obtener el nombre del archivo JSON actualmente seleccionado
+            const jsonFile = sessionStorage.getItem('jsonFile');
+            const jsonData = await loadData(jsonFile);
+
+            // Calcular el porcentaje y renderizar el mapa con los datos actualizados
+            const percentageData = calculatePercentage(jsonData, selectedRange);
+            const seriesData = formatDataForMap(percentageData);
+            renderMap(seriesData);
+        }
+
+        function cambiarJson(fileName) {
+            sessionStorage.setItem('jsonFile', fileName);
+            changeRange(); // Reload map with new JSON data
+        }
+
+        // Function to calculate the percentage based on the selected range
+        function calculatePercentage(jsonData, selectedRange) {
+            return jsonData.data.map(entry => {
+                const totalResponses = entry["Base: Total"];
+                let selectedOptionCount = 0;
+                // Determine the count based on the selected range
+                switch (selectedRange) {
+                    case "To a great extent":
+                        selectedOptionCount = entry["To a great extent"];
+                        break;
+                    case "Somewhat":
+                        selectedOptionCount = entry["Somewhat"];
+                        break;
+                    case "Very little":
+                        selectedOptionCount = entry["Very little"];
+                        break;
+                    case "Not at all":
+                        selectedOptionCount = entry["Not at all"];
+                        break;
+                    case "Don't know":
+                        selectedOptionCount = entry["Don't know"];
+                        break;
+                    default:
+                        break;
+                }
+                // Calculate the percentage based on the selected option count
+                const selectedOptionPercentage = (selectedOptionCount / totalResponses) * 100;
+                const roundedPercentage = Number(selectedOptionPercentage.toFixed(2));
+                return {
+                    code: entry.PAIS,
+                    value: roundedPercentage
+                };
+            });
+        }
+
+        // Function to format data for the map
+        function formatDataForMap(data) {
+            return data.filter(entry => entry.value !== undefined); // Remove entries with undefined values
+        }
+
+        // Initial rendering
+        sessionStorage.setItem('jsonFile', 'Q2.json'); // Set default JSON file
+        loadData('Q2.json').then(jsonData => {
+            var percentageData = calculatePercentage(jsonData, 'To a great extent'); // Set default selected range
+            var seriesData = formatDataForMap(percentageData);
+            renderMap(seriesData);
+        });
+    </script>
+</body>
+</html>
