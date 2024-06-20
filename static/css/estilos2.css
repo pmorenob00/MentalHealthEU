@@ -1,0 +1,44 @@
+h1 {
+    color: blue;
+} 
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+}
+
+.intro,
+.card-body {
+    max-width: 1000px; /* Ajustar según sea necesario */
+    margin: 40px auto; /* Ajustar según sea necesario */
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8); /* Agrega transparencia al fondo */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.intro p,
+.card-body p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    color: #333333;
+}
+
+.intro p:first-of-type,
+.card-body p:first-of-type {
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #333333;
+    text-align: center;
+}
+
+.intro p:last-of-type,
+.card-body p:last-of-type {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #666666;
+    text-align: center;
+}

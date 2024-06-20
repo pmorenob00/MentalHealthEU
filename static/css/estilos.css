@@ -1,0 +1,147 @@
+/* estilos.css */
+
+h1 {
+    color: blue;
+}
+
+/* Clase para hacer el desplegable más pequeño */
+.select {
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.5em 1em;
+    color: white;
+    background-color: blue;
+    margin-top: 20px; 
+    height: calc(2rem + 0.5rem + 1px);
+}
+
+.btn {
+    float: right;
+    margin: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.5em 1em;
+    color: white;
+    background-color: blue;
+    margin-top: 20px;
+    transition: transform 0.3s;
+}
+
+#container {
+    height: 600px; /* Adjust height as needed */
+}
+
+.btn:hover {
+    transform: translateY(-10px);
+}
+
+/* Estilos para el contenedor de botones */
+.button-container {
+    margin-bottom: 10px; /* Espacio entre los contenedores de botones */
+}
+
+/* Estilos para los contenedores de interruptores y etiquetas */
+.switch-container {
+    display: flex; /* Usar flexbox para alinear elementos */
+    align-items: center; /* Centrar verticalmente los elementos */
+    margin-bottom: 10px; /* Espacio entre las opciones */
+    cursor: pointer; /* Cambiar cursor al pasar por encima */
+}
+
+/* Estilos para los botones de radio personalizados (switches) */
+input[type="radio"] {
+    display: none; /* Ocultar el botón de radio nativo */
+}
+
+/* Estilos para el interruptor (switch) */
+.switch {
+    width: 30px;
+    height: 16px;
+    border-radius: 8px;
+    background-color: #ccc;
+    margin-right: 10px;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilos para el interruptor (switch) cuando está activado */
+input[type="radio"]:checked + .switch {
+    background-color: #5bc0de;
+}
+
+/* Estilos para la bola interior del interruptor (switch) */
+.switch::before {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #fff;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+}
+
+/* Estilos para la bola interior del interruptor (switch) cuando está activado */
+input[type="radio"]:checked + .switch::before {
+    transform: translateX(14px); /* Mover la bola a la derecha */
+}
+
+/* Estilos para el texto (label) de los interruptores */
+.switch-label {
+    font-size: 16px;
+}
+
+/* Estilos para las flechas */
+.flecha {
+    position: absolute;
+    top: 9%;
+    color: blue;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s;
+    z-index: 10; /* Asegúrate de que las flechas estén por encima de otros elementos */
+}
+
+.flecha.izquierda {
+    left: 48px;
+}
+
+.flecha.derecha {
+    right: 48px;
+}
+
+/* Estilos adicionales para la flecha izquierda */
+.flecha.izquierda::before {
+    content: '';
+    position: absolute;
+    width: 15px; /* Ajusta el ancho de la punta de la flecha */
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 15px solid blue; /* Ajusta el ancho de la punta de la flecha */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 5px; /* Ajusta el radio para hacer la flecha más redondeada */
+}
+
+/* Estilos adicionales para la flecha derecha */
+.flecha.derecha::before {
+    content: '';
+    position: absolute;
+    width: 15px; /* Ajusta el ancho de la punta de la flecha */
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 15px solid blue; /* Ajusta el ancho de la punta de la flecha */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 5px; /* Ajusta el radio para hacer la flecha más redondeada */
+}
+
+/* Efecto de hover para las flechas */
+.flecha:hover {
+    transform: scale(1.2); /* Aumenta el tamaño en el hover */
+}
